@@ -1,6 +1,7 @@
+using Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using API.Models;
+using API.Data;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -95,4 +96,34 @@ public class EncargadosController : ControllerBase
     {
         return _context.Encargados.Any(e => e.ID == id);
     }
+    //coso pa login
+    public class LoginRequest
+    {
+        public string? Nombre { get; set; }
+        public string? Password { get; set; }
+    }
+
+    // Esta ruta se convierte en "Encargados/Login"
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    {
+        if (request == null || string.IsNullOrEmpty(request.Nombre) || string.IsNullOrEmpty(request.Password))
+        {
+            return BadRequest("Faltan ingresar datos requeridos.");
+        }
+
+        // Buscamos en la base de datos de SQL Server
+        var encargado = await _context.Encargados
+            .FirstOrDefaultAsync(e => e.Nombre == request.Nombre && e.Password == request.Password);
+
+        if (encargado == null)
+ 
+        {
+            return Unauthorized("La clave o la contraseña son incorrectas.");
+        }
+
+        // Si todo está bien, regresas el usuario (o un token en el futuro)
+        return Ok(new { Message = "Login exitoso", EncargadosId = encargado.ID });
+    }
+
 }

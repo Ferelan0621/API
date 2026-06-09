@@ -1,6 +1,7 @@
+using Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using API.Models;
+using API.Data;
 
 [Route("api/[controller]")]
 [ApiController]
