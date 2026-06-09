@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace API.Migrations
 {
     /// <inheritdoc />
-    public partial class initok : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,7 @@ namespace API.Migrations
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    password = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Estatus = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -33,8 +33,8 @@ namespace API.Migrations
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IDSerial = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Nombre_Laboratorio = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Edifico = table.Column<int>(type: "int", nullable: false),
+                    NombreLaboratorio = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Edificio = table.Column<int>(type: "int", nullable: false),
                     Estatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -46,16 +46,16 @@ namespace API.Migrations
                 name: "Usuarios",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Clave_ISSEMYM = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ClaveISSEMYM = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Rol = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Usuarios", x => x.Id);
+                    table.PrimaryKey("PK_Usuarios", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -66,9 +66,9 @@ namespace API.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UsuarioID = table.Column<int>(type: "int", nullable: false),
                     LaboratorioID = table.Column<int>(type: "int", nullable: false),
-                    Fecha_Prestamo = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Hora_Inicio = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Hora_Final = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FechaPrestamo = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    HoraInicio = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    HoraFinal = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EncargadoID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -90,7 +90,7 @@ namespace API.Migrations
                         name: "FK_Prestamos_Usuarios_UsuarioID",
                         column: x => x.UsuarioID,
                         principalTable: "Usuarios",
-                        principalColumn: "Id",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
