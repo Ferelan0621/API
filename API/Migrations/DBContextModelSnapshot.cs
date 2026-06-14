@@ -55,19 +55,20 @@ namespace API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("Edificio")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Estatus")
-                        .HasColumnType("int");
-
-                    b.Property<string>("IDSerial")
+                    b.Property<string>("direccionLora")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NombreLaboratorio")
+                    b.Property<int>("edificio")
+                        .HasColumnType("int");
+
+                    b.Property<int>("estatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("nombreLaboratorio")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasAnnotation("Relational:JsonPropertyName", "nombrelaboratorio");
 
                     b.HasKey("ID");
 
@@ -148,7 +149,7 @@ namespace API.Migrations
                         .IsRequired();
 
                     b.HasOne("Shared.Models.Laboratorios", "Laboratorio")
-                        .WithMany("Prestamos")
+                        .WithMany("prestamos")
                         .HasForeignKey("LaboratorioID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -168,7 +169,7 @@ namespace API.Migrations
 
             modelBuilder.Entity("Shared.Models.Laboratorios", b =>
                 {
-                    b.Navigation("Prestamos");
+                    b.Navigation("prestamos");
                 });
 
             modelBuilder.Entity("Shared.Models.Usuarios", b =>

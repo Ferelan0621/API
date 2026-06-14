@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace API.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class migracion : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,10 +32,10 @@ namespace API.Migrations
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    IDSerial = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NombreLaboratorio = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Edificio = table.Column<int>(type: "int", nullable: false),
-                    Estatus = table.Column<int>(type: "int", nullable: false)
+                    direccionLora = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    nombreLaboratorio = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    edificio = table.Column<int>(type: "int", nullable: false),
+                    estatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

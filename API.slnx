@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="../../trabajos_homer_c#/Sistema_acceso_puertas/Shared/Shared.csproj" />
   <Project Path="API/API.csproj" />
 </Solution>
