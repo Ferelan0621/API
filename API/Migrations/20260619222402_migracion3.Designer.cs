@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20260610201722_migracion")]
-    partial class migracion
+    [Migration("20260619222402_migracion3")]
+    partial class migracion3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,20 +58,19 @@ namespace API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<string>("direccionLora")
+                    b.Property<string>("DireccionLora")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("edificio")
+                    b.Property<int>("Edificio")
                         .HasColumnType("int");
 
-                    b.Property<int>("estatus")
+                    b.Property<int>("Estatus")
                         .HasColumnType("int");
 
-                    b.Property<string>("nombreLaboratorio")
+                    b.Property<string>("NombreLaboratorio")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "nombrelaboratorio");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
@@ -89,13 +88,16 @@ namespace API.Migrations
                     b.Property<int>("EncargadoID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("FechaPrestamo")
+                    b.Property<DateTime>("FechaApertura")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("HoraFinal")
+                    b.Property<DateTime>("FechaCierre")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("HoraInicio")
+                    b.Property<DateTime>("FechaCierreRemoto")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaSolicitud")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("LaboratorioID")

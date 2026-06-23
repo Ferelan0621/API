@@ -1,99 +1,135 @@
 using API.Data;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shared.Models;
+using System.Text.Json;
 
-[Route("api/[controller]")]
-[ApiController]
-public class PrestamosController : ControllerBase
+namespace API.Controllers
 {
-    private readonly DBContext _context;
-    public PrestamosController(DBContext context)
-    {
-        _context = context;
-    }
 
-    // GET: api/Prestamos
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Prestamos>>> GetPrestamos()
-    {
-        return await _context.Prestamos.ToListAsync();
-    }
 
-    // GET: api/Prestamos/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Prestamos>> GetPrestamos(int id)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class PrestamosController : ControllerBase
     {
-        var prestamos = await _context.Prestamos.FindAsync(id);
+        private readonly DBContext _context;
 
-        if (prestamos == null)
+        public PrestamosController(DBContext context)
         {
-            return NotFound();
+            _context = context;
+            
         }
 
-        return prestamos;
-    }
 
-    // PUT: api/Prestamos/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutPrestamos(int? id, Prestamos prestamos)
-    {
-        if (id != prestamos.ID)
+
+        // GET: api/Prestamos
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Prestamos>>> GetPrestamos()
         {
-            return BadRequest();
+            return await _context.Prestamos
+                .Include(p => p.Laboratorio) 
+                .Include(p => p.Usuario)     
+                .Include(p => p.Encargado)   
+                .ToListAsync();
         }
 
-        _context.Entry(prestamos).State = EntityState.Modified;
+        // GET: api/Prestamos/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Prestamos>> GetPrestamos(int id)
+        {
+            // Nota: FindAsync() no soporta .Include(), así que usamos FirstOrDefaultAsync()
+            var prestamo = await _context.Prestamos
+                .Include(p => p.Laboratorio)
+                .Include(p => p.Usuario)
+                .Include(p => p.Encargado)
+                .FirstOrDefaultAsync(p => p.ID == id);
 
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!PrestamosExists(id))
+            if (prestamo == null)
             {
                 return NotFound();
             }
-            else
-            {
-                throw;
-            }
+
+            return prestamo;
         }
 
-        return NoContent();
-    }
-
-    // POST: api/Prestamos
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPost]
-    public async Task<ActionResult<Prestamos>> PostPrestamos(Prestamos prestamos)
-    {
-        _context.Prestamos.Add(prestamos);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction("GetPrestamos", new { id = prestamos.ID }, prestamos);
-    }
-
-    // DELETE: api/Prestamos/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePrestamos(int? id)
-    {
-        var prestamos = await _context.Prestamos.FindAsync(id);
-        if (prestamos == null)
+        // PUT: api/Prestamos/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutPrestamos(int? id, Prestamos prestamos)
         {
-            return NotFound();
+            if (id != prestamos.ID)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(prestamos).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!PrestamosExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
-        _context.Prestamos.Remove(prestamos);
-        await _context.SaveChangesAsync();
+        // POST: api/Prestamos
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Prestamos>> PostPrestamos(Prestamos prestamos)
+        {
+            _context.Prestamos.Add(prestamos);
+            await _context.SaveChangesAsync();
 
-        return NoContent();
-    }
+            return CreatedAtAction("GetPrestamos", new { id = prestamos.ID }, prestamos);
+        }
 
-    private bool PrestamosExists(int? id)
-    {
-        return _context.Prestamos.Any(e => e.ID == id);
+        [HttpGet("usuario/{usuarioId}")]
+        public async Task<ActionResult<IEnumerable<Prestamos>>> GetPrestamosPorUsuario(int usuarioId)
+        {
+            var prestamos = await _context.Prestamos
+                .Include(p => p.Laboratorio) // IMPORTANTE: Para que el XAML pueda pintar el NombreLaboratorio
+                .Where(p => p.UsuarioID == usuarioId)
+                .OrderByDescending(p => p.FechaSolicitud) // Ordenar los más recientes primero
+                .ToListAsync();
+
+            if (prestamos == null || !prestamos.Any())
+            {
+                return NotFound("No se encontraron préstamos para este usuario.");
+            }
+
+            return Ok(prestamos);
+        }
+        // DELETE: api/Prestamos/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePrestamos(int? id)
+        {
+            var prestamos = await _context.Prestamos.FindAsync(id);
+            if (prestamos == null)
+            {
+                return NotFound();
+            }
+
+            _context.Prestamos.Remove(prestamos);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool PrestamosExists(int? id)
+        {
+            return _context.Prestamos.Any(e => e.ID == id);
+        }
     }
 }

@@ -32,10 +32,10 @@ namespace API.Migrations
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    direccionLora = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    nombreLaboratorio = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    edificio = table.Column<int>(type: "int", nullable: false),
-                    estatus = table.Column<int>(type: "int", nullable: false)
+                    DireccionLora = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NombreLaboratorio = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Edificio = table.Column<int>(type: "int", nullable: false),
+                    Estatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -66,10 +66,11 @@ namespace API.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UsuarioID = table.Column<int>(type: "int", nullable: false),
                     LaboratorioID = table.Column<int>(type: "int", nullable: false),
-                    FechaPrestamo = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    HoraInicio = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    HoraFinal = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EncargadoID = table.Column<int>(type: "int", nullable: false)
+                    EncargadoID = table.Column<int>(type: "int", nullable: false),
+                    FerchaSolicitud = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FechaApertura = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FechaCierre = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FechaCierreRemoto = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {

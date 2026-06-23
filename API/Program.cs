@@ -1,4 +1,5 @@
 using API.Data;
+using API.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +10,7 @@ builder.Services.AddDbContext<DBContext>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers().AddJsonOptions(x =>
     x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
-
+builder.Services.AddSingleton<NotificadorLaboratorios>();
 var app = builder.Build();
 
 app.MapControllers();
