@@ -49,7 +49,7 @@ namespace API.Controllers
             }
 
             _notificador.OnLaboratorioActualizado += EnviarActualizacion;
-
+            
             try
             {
                 await tcs.Task;
