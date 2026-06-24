@@ -10,7 +10,9 @@ builder.Services.AddDbContext<DBContext>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers().AddJsonOptions(x =>
     x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
-builder.Services.AddSingleton<NotificadorLaboratorios>();
+// IMPORTANTE: Tienen que ser AddSingleton, NO AddScoped ni AddTransient
+builder.Services.AddSingleton<API.Services.NotificadorLaboratorios>();
+builder.Services.AddSingleton<API.Services.NotificadorPrestamos>();
 var app = builder.Build();
 
 app.MapControllers();

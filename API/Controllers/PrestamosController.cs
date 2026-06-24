@@ -14,13 +14,15 @@ namespace API.Controllers
     public class PrestamosController : ControllerBase
     {
         private readonly DBContext _context;
+        private readonly NotificadorPrestamos _notificador;
 
-        public PrestamosController(DBContext context)
+
+        public PrestamosController(DBContext context, NotificadorPrestamos notificador)
         {
             _context = context;
-            
+            _notificador = notificador;
         }
-
+     
 
 
         // GET: api/Prestamos
@@ -58,27 +60,19 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPrestamos(int? id, Prestamos prestamos)
         {
-            if (id != prestamos.ID)
-            {
-                return BadRequest();
-            }
+            if (id != prestamos.ID) return BadRequest();
 
             _context.Entry(prestamos).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+                await NotificarCambios(); // Notificar en tiempo real
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!PrestamosExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                if (!PrestamosExists(id)) return NotFound();
+                else throw;
             }
 
             return NoContent();
@@ -91,6 +85,7 @@ namespace API.Controllers
         {
             _context.Prestamos.Add(prestamos);
             await _context.SaveChangesAsync();
+            await NotificarCambios(); // Notificar en tiempo real
 
             return CreatedAtAction("GetPrestamos", new { id = prestamos.ID }, prestamos);
         }
@@ -111,6 +106,48 @@ namespace API.Controllers
 
             return Ok(prestamos);
         }
+
+        // --- ENDPOINT SSE ---
+        [HttpGet("stream")]
+        public async Task GetStream(CancellationToken ct)
+        {
+            // 1. Corrección en la asignación de cabeceras para evitar excepciones "Key already exists"
+            Response.ContentType = "text/event-stream";
+            Response.Headers["Cache-Control"] = "no-cache";
+            Response.Headers["Connection"] = "keep-alive";
+
+            // 2. Corrección del TaskCompletionSource para compatibilidad de versiones
+            var tcs = new TaskCompletionSource<bool>();
+            ct.Register(() => tcs.TrySetResult(true));
+
+            // 3. Corrección a async void con manejo de excepciones y await
+            async void EnviarActualizacion(string json)
+            {
+                try
+                {
+                    await Response.WriteAsync($"data: {json}\n\n");
+                    await Response.Body.FlushAsync();
+                }
+                catch (Exception)
+                {
+                    // Si el cliente se desconectó justo antes de enviar, ignoramos el error
+                    // para no tumbar la aplicación.
+                }
+            }
+
+            _notificador.OnPrestamosActualizado += EnviarActualizacion;
+
+            try
+            {
+                await tcs.Task;
+            }
+            finally
+            {
+                _notificador.OnPrestamosActualizado -= EnviarActualizacion;
+            }
+        }
+
+
         // DELETE: api/Prestamos/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePrestamos(int? id)
@@ -123,9 +160,22 @@ namespace API.Controllers
 
             _context.Prestamos.Remove(prestamos);
             await _context.SaveChangesAsync();
+            await NotificarCambios(); // Notificar en tiempo real
 
             return NoContent();
         }
+
+
+        private async Task NotificarCambios()
+        {
+            var lista = await _context.Prestamos.ToListAsync();
+            var json = JsonSerializer.Serialize(lista, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+            _notificador.NotificarCambio(json);
+        }
+
 
         private bool PrestamosExists(int? id)
         {

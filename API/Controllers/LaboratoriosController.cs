@@ -24,23 +24,40 @@ namespace API.Controllers
         [HttpGet("stream")]
         public async Task GetStream(CancellationToken ct)
         {
-            Response.Headers.Add("Content-Type", "text/event-stream");
-            Response.Headers.Add("Cache-Control", "no-cache");
-            Response.Headers.Add("Connection", "keep-alive");
+            // 1. Corrección en la asignación de cabeceras para evitar excepciones "Key already exists"
+            Response.ContentType = "text/event-stream";
+            Response.Headers["Cache-Control"] = "no-cache";
+            Response.Headers["Connection"] = "keep-alive";
 
-            var tcs = new TaskCompletionSource();
-            ct.Register(() => tcs.TrySetResult());
+            // 2. Corrección del TaskCompletionSource para compatibilidad de versiones
+            var tcs = new TaskCompletionSource<bool>();
+            ct.Register(() => tcs.TrySetResult(true));
 
-            void EnviarActualizacion(string json)
+            // 3. Corrección a async void con manejo de excepciones y await
+            async void EnviarActualizacion(string json)
             {
-                Response.WriteAsync($"data: {json}\n\n");
-                Response.Body.FlushAsync();
+                try
+                {
+                    await Response.WriteAsync($"data: {json}\n\n");
+                    await Response.Body.FlushAsync();
+                }
+                catch (Exception)
+                {
+                    // Si el cliente se desconectó justo antes de enviar, ignoramos el error
+                    // para no tumbar la aplicación.
+                }
             }
 
             _notificador.OnLaboratorioActualizado += EnviarActualizacion;
 
-            try { await tcs.Task; }
-            finally { _notificador.OnLaboratorioActualizado -= EnviarActualizacion; }
+            try
+            {
+                await tcs.Task;
+            }
+            finally
+            {
+                _notificador.OnLaboratorioActualizado -= EnviarActualizacion;
+            }
         }
 
         // --- OPERACIONES REST ---
